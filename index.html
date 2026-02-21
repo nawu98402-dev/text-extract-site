@@ -2,156 +2,110 @@
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>网页文字提取工具</title>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: "Microsoft YaHei", sans-serif;
-        }
-
         body {
-            background-color: #f5f7fa;
+            font-family: Arial, sans-serif;
+            max-width: 600px;
+            margin: 50px auto;
             padding: 20px;
         }
-
         .container {
-            max-width: 900px;
-            margin: 50px auto;
-            background: white;
-            padding: 30px;
-            border-radius: 12px;
-            box-shadow: 0 2px 20px rgba(0,0,0,0.08);
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
         }
-
-        h1 {
-            text-align: center;
-            margin-bottom: 10px;
-            font-size: 24px;
-            color: #333;
-        }
-
-        .desc {
-            text-align: center;
-            color: #666;
-            margin-bottom: 30px;
-        }
-
-        .input-box {
+        input, button {
             width: 100%;
-            padding: 14px 16px;
+            padding: 10px;
+            margin: 10px 0;
             border: 1px solid #ddd;
-            border-radius: 8px;
-            font-size: 16px;
-            margin-bottom: 15px;
-            outline: none;
+            border-radius: 4px;
+            box-sizing: border-box;
         }
-
-        .input-box:focus {
-            border-color: #409eff;
-        }
-
-        .btn-box {
-            display: flex;
-            gap: 10px;
-            margin-bottom: 20px;
-        }
-
         button {
-            flex: 1;
-            padding: 14px;
-            border: none;
-            border-radius: 8px;
-            background: #409eff;
+            background: #007bff;
             color: white;
-            font-size: 16px;
+            border: none;
             cursor: pointer;
-            transition: 0.2s;
         }
-
         button:hover {
-            background: #338eef;
+            background: #0056b3;
         }
-
-        button.secondary {
-            background: #67c23a;
+        #result {
+            white-space: pre-wrap;
+            background: white;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            min-height: 100px;
         }
-
-        .result-box {
-            width: 100%;
-            height: 350px;
+        /* 广告位样式 */
+        .ad-space {
+            margin: 20px 0;
             padding: 15px;
-            border: 1px solid #eee;
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
             border-radius: 8px;
-            resize: none;
-            font-size: 15px;
-            line-height: 1.6;
-            background: #fdfdfd;
+            text-align: center;
         }
-
-        .tips {
-            margin-top: 10px;
-            font-size: 12px;
-            color: #999;
+        .ad-space a {
+            color: #007bff;
+            text-decoration: none;
+            font-weight: bold;
+        }
+        .ad-space a:hover {
+            text-decoration: underline;
         }
     </style>
 </head>
 <body>
+    <div class="container">
+        <h1>网页文字提取工具</h1>
 
-<div class="container">
-    <h1>网页文字提取工具</h1>
-    <p class="desc">输入网址，一键提取文章正文，去除广告</p >
+        <!-- 🔔 顶部广告位 -->
+        <div class="ad-space">
+            <p>🔥 推荐：用这个工具帮你自动提取网页文字，省时间又省力！</p >
+            <a href=" " target="_blank">立即使用</a >
+        </div>
 
-    <input type="text" class="input-box" id="urlInput" placeholder="请输入网页链接（URL）">
+        <input type="text" id="urlInput" placeholder="请输入网页链接 (URL)">
+        <button onclick="extractText()">提取文字</button>
+        <h3>提取结果：</h3>
+        <div id="result"></div>
 
-    <div class="btn-box">
-        <button onclick="extractText()">开始提取</button>
-        <button class="secondary" onclick="copyResult()">复制结果</button>
+        <!-- 🔔 底部广告位 -->
+        <div class="ad-space" style="margin-top: 30px;">
+            <p>💡 想学习更多副业技巧？关注我的公众号：【你的公众号名称】</p >
+            <a href="https://mp.weixin.qq.com/" target="_blank">点击关注</a >
+        </div>
     </div>
 
-    <textarea class="result-box" id="resultArea" placeholder="提取结果将显示在这里..."></textarea>
+    <script>
+        async function extractText() {
+            const url = document.getElementById('urlInput').value;
+            const resultDiv = document.getElementById('result');
 
-    <p class="tips">提示：部分网站可能限制跨域，无法抓取属于正常现象</p >
-</div>
+            if (!url) {
+                resultDiv.textContent = '请输入有效的网页链接';
+                return;
+            }
 
-<script>
-    async function extractText() {
-        const url = document.getElementById('urlInput').value.trim();
-        const resultArea = document.getElementById('resultArea');
+            resultDiv.textContent = '正在提取...';
 
-        if (!url) {
-            alert('请输入网页链接');
-            return;
+            try {
+                const proxyUrl = 'https://api.allorigins.win/raw?url=' + encodeURIComponent(url);
+                const response = await fetch(proxyUrl);
+                const html = await response.text();
+                const parser = new DOMParser();
+                const doc = parser.parseFromString(html, 'text/html');
+                const text = doc.body.textContent || doc.body.innerText;
+                resultDiv.textContent = text.trim() || '未提取到文字内容';
+            } catch (error) {
+                resultDiv.textContent = '提取失败：' + error.message;
+            }
         }
-
-        resultArea.value = '正在提取中，请稍候...';
-
-        try {
-            const res = await fetch(url);
-            const html = await res.text();
-
-            // 简单提取正文（AI写的逻辑）
-            let text = html.replace(/<style[^>]*>[\s\S]*?<\/style>/gi, '');
-            text = text.replace(/<script[^>]*>[\s\S]*?<\/script>/gi, '');
-            text = text.replace(/<!--[\s\S]*?-->/g, '');
-            text = text.replace(/<[^>]+>/g, '');
-            text = text.replace(/\s+/g, ' ').trim();
-
-            resultArea.value = text.slice(0, 15000);
-        } catch (e) {
-            resultArea.value = '提取失败：该网站禁止跨域访问，无法直接抓取。\n你可以使用配套Chrome插件使用。';
-        }
-    }
-
-    function copyResult() {
-        const resultArea = document.getElementById('resultArea');
-        resultArea.select();
-        document.execCommand('copy');
-        alert('复制成功！');
-    }
-</script>
-
+    </script>
 </body>
 </html>
