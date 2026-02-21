@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>网页文字提取工具</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: "Microsoft YaHei", sans-serif;
+        }
+
+        body {
+            background-color: #f5f7fa;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 50px auto;
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 2px 20px rgba(0,0,0,0.08);
+        }
+
+        h1 {
+            text-align: center;
+            margin-bottom: 10px;
+            font-size: 24px;
+            color: #333;
+        }
+
+        .desc {
+            text-align: center;
+            color: #666;
+            margin-bottom: 30px;
+        }
+
+        .input-box {
+            width: 100%;
+            padding: 14px 16px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 16px;
+            margin-bottom: 15px;
+            outline: none;
+        }
+
+        .input-box:focus {
+            border-color: #409eff;
+        }
+
+        .btn-box {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        button {
+            flex: 1;
+            padding: 14px;
+            border: none;
+            border-radius: 8px;
+            background: #409eff;
+            color: white;
+            font-size: 16px;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+        button:hover {
+            background: #338eef;
+        }
+
+        button.secondary {
+            background: #67c23a;
+        }
+
+        .result-box {
+            width: 100%;
+            height: 350px;
+            padding: 15px;
+            border: 1px solid #eee;
+            border-radius: 8px;
+            resize: none;
+            font-size: 15px;
+            line-height: 1.6;
+            background: #fdfdfd;
+        }
+
+        .tips {
+            margin-top: 10px;
+            font-size: 12px;
+            color: #999;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>网页文字提取工具</h1>
+    <p class="desc">输入网址，一键提取文章正文，去除广告</p >
+
+    <input type="text" class="input-box" id="urlInput" placeholder="请输入网页链接（URL）">
+
+    <div class="btn-box">
+        <button onclick="extractText()">开始提取</button>
+        <button class="secondary" onclick="copyResult()">复制结果</button>
+    </div>
+
+    <textarea class="result-box" id="resultArea" placeholder="提取结果将显示在这里..."></textarea>
+
+    <p class="tips">提示：部分网站可能限制跨域，无法抓取属于正常现象</p >
+</div>
+
+<script>
+    async function extractText() {
+        const url = document.getElementById('urlInput').value.trim();
+        const resultArea = document.getElementById('resultArea');
+
+        if (!url) {
+            alert('请输入网页链接');
+            return;
+        }
+
+        resultArea.value = '正在提取中，请稍候...';
+
+        try {
+            const res = await fetch(url);
+            const html = await res.text();
+
+            // 简单提取正文（AI写的逻辑）
+            let text = html.replace(/<style[^>]*>[\s\S]*?<\/style>/gi, '');
+            text = text.replace(/<script[^>]*>[\s\S]*?<\/script>/gi, '');
+            text = text.replace(/<!--[\s\S]*?-->/g, '');
+            text = text.replace(/<[^>]+>/g, '');
+            text = text.replace(/\s+/g, ' ').trim();
+
+            resultArea.value = text.slice(0, 15000);
+        } catch (e) {
+            resultArea.value = '提取失败：该网站禁止跨域访问，无法直接抓取。\n你可以使用配套Chrome插件使用。';
+        }
+    }
+
+    function copyResult() {
+        const resultArea = document.getElementById('resultArea');
+        resultArea.select();
+        document.execCommand('copy');
+        alert('复制成功！');
+    }
+</script>
+
+</body>
+</html>
